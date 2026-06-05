@@ -1,0 +1,18 @@
+{
+  "hosts": [
+    {
+      "id": "pve1",
+      "name": "Proxmox",
+      "kvmUrl": "https://pve1-kvm.example.com",
+      "haEntity": "sensor.pve1_power",
+      "lokiSelector": "{host=\"pve1\"}"
+    },
+    {
+      "id": "unraid",
+      "name": "Unraid",
+      "kvmUrl": "https://unraid-kvm.example.com",
+      "haEntity": "sensor.unraid_power",
+      "lokiSelector": "{host=\"unraid\"}"
+    }
+  ]
+}

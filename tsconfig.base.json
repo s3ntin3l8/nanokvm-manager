@@ -6,13 +6,11 @@
     "moduleResolution": "Bundler",
     "lib": ["ES2023"],
     "strict": true,
-    "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "verbatimModuleSyntax": true,
     "noEmit": true
   }
 }
