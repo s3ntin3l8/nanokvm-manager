@@ -1,0 +1,28 @@
+# Copy to compose.override.yaml (gitignored) and adjust for your environment.
+# `docker compose up` auto-merges this over compose.yaml — use it for local
+# source builds and/or to attach the app to an EXISTING Traefik proxy network.
+#
+# Replace nanokvm.example.com / proxy / letsencrypt / websecure with your values.
+services:
+  app:
+    # Build from source instead of pulling the published GHCR image.
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nanokvm-manager:local
+    pull_policy: build
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.nanokvm.rule=Host(`nanokvm.example.com`)
+      - traefik.http.routers.nanokvm.entrypoints=websecure
+      - traefik.http.routers.nanokvm.tls.certresolver=letsencrypt
+      - traefik.http.services.nanokvm.loadbalancer.server.port=8080
+
+# The proxy network is created/owned by your existing Traefik stack.
+networks:
+  proxy:
+    external: true

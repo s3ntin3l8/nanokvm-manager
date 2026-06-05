@@ -5,6 +5,9 @@
 *.local
 config/hosts.json
 config/hosts.yaml
+# Local Docker Compose override (real hostnames / Traefik labels). Use
+# compose.override.example.yaml as the template.
+compose.override.yaml
 
 # Node
 node_modules/

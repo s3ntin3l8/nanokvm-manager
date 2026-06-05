@@ -33,3 +33,23 @@ pnpm build               # build all workspaces
 
 Git hooks (via Husky): **pre-commit** runs lint-staged (eslint + prettier on staged files),
 **pre-push** runs typecheck + tests, **commit-msg** enforces Conventional Commits.
+
+## Deploy
+
+The app runs as a single Docker image serving the API + built frontend on `:8080`. Auth is delegated
+to your reverse proxy + SSO — never expose it unauthenticated (it can power/reset machines).
+
+- **`compose.yaml`** — production base; pulls `ghcr.io/<owner>/nanokvm-manager:latest`, reads `.env`,
+  mounts `./config` (your `config/hosts.json`).
+- **`compose.override.example.yaml`** — copy to `compose.override.yaml` (gitignored) to build from
+  source and/or attach to an existing **Traefik** proxy network. Adjust the host rule, network, cert
+  resolver, and entrypoint to your setup.
+- **`compose.traefik.example.yaml`** — self-contained full stack (Traefik + app with automatic TLS)
+  if you don't already run a reverse proxy.
+
+```bash
+docker compose up -d                                   # base + your compose.override.yaml
+docker compose -f compose.traefik.example.yaml up -d   # full Traefik stack example
+```
+
+Images are published to GHCR automatically on GitHub **release** (`.github/workflows/release.yml`).
