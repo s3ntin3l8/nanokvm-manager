@@ -23,7 +23,7 @@ describe('NanoKvmClient', () => {
     return new NanoKvmClient({
       baseUrl: 'https://kvm.test/',
       username: 'kvmadmin',
-      password: '***REDACTED-PASSWORD***',
+      password: 'test-passw0rd!42',
       fetchFn: fetchFn as unknown as typeof fetch,
     });
   }
@@ -46,7 +46,7 @@ describe('NanoKvmClient', () => {
       decodeURIComponent(sentPassword),
       NANOKVM_PASSPHRASE,
     ).toString(CryptoJS.enc.Utf8);
-    expect(decrypted).toBe('***REDACTED-PASSWORD***');
+    expect(decrypted).toBe('test-passw0rd!42');
 
     // Second call = authed request carrying the token cookie.
     const [, gpioInit] = fetchFn.mock.calls[1];

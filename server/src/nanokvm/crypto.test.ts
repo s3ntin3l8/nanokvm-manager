@@ -4,7 +4,7 @@ import { encryptPassword, NANOKVM_PASSPHRASE } from './crypto';
 
 describe('encryptPassword', () => {
   it('round-trips: decrypting the output with the NanoKVM passphrase yields the plaintext', () => {
-    const plaintext = '***REDACTED-PASSWORD***';
+    const plaintext = 'test-passw0rd!42';
     const encrypted = encryptPassword(plaintext);
 
     // The wire value is URI-encoded base64 of the CryptoJS "Salted__" envelope.

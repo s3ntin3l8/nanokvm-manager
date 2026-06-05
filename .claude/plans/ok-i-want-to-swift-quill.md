@@ -32,8 +32,8 @@ confirm), and an expandable Loki log drawer — and opens the native NanoKVM UI 
 ## Phase 0 — Spike FIRST (gate everything on this)
 
 **Live spike targets (provided by user):**
-- NanoKVM units: `198.51.100.10` and `198.51.100.20`
-- Via Traefik reverse proxy: `https://pve1-kvm.example.internal/` and `https://unraid-kvm.example.internal/`
+- NanoKVM units: two units on the LAN (IPs redacted)
+- Via Traefik reverse proxy: two HTTPS reverse-proxy hostnames (redacted)
 - Credentials in `.env`: `NANOKVM_USER` and the password var (user wrote `NANKVM_PWD` — verify exact
   name when reading `.env`, there may be a typo to reconcile).
 - Ground-truth method: drive the native UI login in the connected browser and read the Network tab

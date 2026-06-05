@@ -1,7 +1,7 @@
 # NanoKVM API — Phase 0 Spike Findings
 
-Verified live on **2026-06-05** against `pve1-kvm.example.internal` → unit `198.51.100.20`
-(firmware: application `2.3.6`, image `v1.4.0`, mDNS `kvm-redacted.local`). No secrets in this file.
+Verified live on **2026-06-05** against real NanoKVM units
+(firmware: application `2.3.6`, image `v1.4.0`). No secrets in this file.
 
 ## 1. Authentication
 
@@ -22,7 +22,7 @@ Verified live on **2026-06-05** against `pve1-kvm.example.internal` → unit `19
   - **Backend replication:** use the `crypto-js` npm package (same lib as the frontend):
     `encodeURIComponent(CryptoJS.AES.encrypt(plaintext, 'nanokvm-sipeed-2024').toString())`.
   - Verified live 2026-06-05: encrypting the real password this way → `POST /api/auth/login` returns
-    `{ "code": 0, "data": { "token": "<jwt>" } }` on both `pve1-kvm` and `unraid-kvm`. (A raw plaintext
+    `{ "code": 0, "data": { "token": "<jwt>" } }` on both units. (A raw plaintext
     password returns `-2 invalid username or password` — that earlier failure was the missing encryption,
     NOT a wrong credential.)
 - On success the response is `{ code:0, data:{ token } }` AND the server sets cookie
@@ -76,7 +76,7 @@ Verified live on **2026-06-05** against `pve1-kvm.example.internal` → unit `19
 
 ## Resolved
 
-- The `.env` credentials (`kvmadmin` / the 19-char password) are **correct**. The earlier `-2` failures
+- The `.env` credentials (the configured user / password) are **correct**. The earlier `-2` failures
   were entirely due to missing the client-side AES encryption described in §1 — once replicated, both
   units return `code:0`. No credential change needed; just standardize the env var names
   (`NANOKMV_USER` → `NANOKVM_USER`, `NANOKVM_PWD` → `NANOKVM_PASSWORD`).
