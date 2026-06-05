@@ -37,7 +37,10 @@ Frontend: `HostGrid` → per-host `HostCard` (isolated state so one host's refre
 
 ## NanoKVM API (verified — see `docs/nanokvm-notes.md` for full detail)
 
-- Login: `POST /api/auth/login {username,password}` (plaintext) → JWT cookie `nano-kvm-token`.
+- Login: `POST /api/auth/login {username, password}` where `password` is **AES-encrypted client-side**:
+  `encodeURIComponent(CryptoJS.AES.encrypt(plaintext, "nanokvm-sipeed-2024").toString())` (CryptoJS
+  passphrase mode; hardcoded firmware passphrase). Returns `{code:0,data:{token}}` + cookie
+  `nano-kvm-token`. Backend uses the `crypto-js` package to replicate. See `docs/nanokvm-notes.md` §1.
 - Power state: `GET /api/vm/gpio` → `{pwr,hdd}`. ATX: `POST /api/vm/gpio {type,duration}`.
 - Snapshot: first JPEG frame from `GET /api/stream/mjpeg` (multipart/x-mixed-replace) — no dedicated endpoint.
 - Identity/status: `GET /api/vm/info` (ips, mdns name, firmware, stable `deviceKey`).

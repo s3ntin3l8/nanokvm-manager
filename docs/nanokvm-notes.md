@@ -5,10 +5,28 @@ Verified live on **2026-06-05** against `pve1-kvm.example.internal` → unit `19
 
 ## 1. Authentication
 
-- `POST /api/auth/login` with JSON body `{ "username": "...", "password": "..." }`.
-- **Password is sent in plaintext** — no RSA/AES/hash on the client (`web/src/api/auth.ts` posts the
-  raw values; confirmed against the live unit).
-- On success the server sets cookie **`nano-kvm-token`** = a **JWT** (HS256). Decoded payload is
+- `POST /api/auth/login` with JSON body `{ "username": "...", "password": "<encrypted>" }`.
+- **The password is encrypted client-side before POST** (this is the critical, easily-missed step —
+  the `login()` API helper looks plaintext, but the login *page component* transforms it first). From
+  the deployed bundle `assets/encrypt-*.js`:
+  ```js
+  const qe = "nanokvm-sipeed-2024";                 // hardcoded firmware passphrase (NOT per-device)
+  function We(R){ const $ = ze.AES.encrypt(R, qe).toString(); return encodeURIComponent($); }
+  ```
+  i.e. `password = encodeURIComponent( CryptoJS.AES.encrypt(plaintext, "nanokvm-sipeed-2024").toString() )`.
+  - CryptoJS passphrase mode == OpenSSL `aes-256-cbc -md md5 -salt`: it derives key+IV from the
+    passphrase + an 8-byte **random salt** (EVP_BytesToKey/MD5, 1 iter) and emits base64 of
+    `"Salted__" + salt + ciphertext`. **Random salt ⇒ the ciphertext differs on every login.**
+  - The passphrase is a static value baked into firmware, so this is obfuscation, not real secrecy —
+    but the server decrypts with it, so we MUST replicate it exactly.
+  - **Backend replication:** use the `crypto-js` npm package (same lib as the frontend):
+    `encodeURIComponent(CryptoJS.AES.encrypt(plaintext, 'nanokvm-sipeed-2024').toString())`.
+  - Verified live 2026-06-05: encrypting the real password this way → `POST /api/auth/login` returns
+    `{ "code": 0, "data": { "token": "<jwt>" } }` on both `pve1-kvm` and `unraid-kvm`. (A raw plaintext
+    password returns `-2 invalid username or password` — that earlier failure was the missing encryption,
+    NOT a wrong credential.)
+- On success the response is `{ code:0, data:{ token } }` AND the server sets cookie
+  **`nano-kvm-token`** = that **JWT** (HS256). Decoded payload is
   `{ "username": "<user>", "exp": <unix> }`. Observed expiry ≈ 1 year out → effectively long-lived.
 - All other `/api/*` calls authenticate via that cookie. The MJPEG `<img>` stream can also carry the
   token as a `?token=<jwt>` query param (used by the browser UI); server-to-server we use the cookie.
@@ -48,15 +66,17 @@ Verified live on **2026-06-05** against `pve1-kvm.example.internal` → unit `19
 
 ## Implications for the build
 
-- `nanokvm` client interface: `login()` (plaintext → capture `nano-kvm-token` cookie, cache, re-auth on
-  401/expiry) · `getGpio()` (power state) · `setGpio(type,duration)` (ATX) · `snapshot()` (first MJPEG
-  frame) · `getInfo()` (status/identity).
+- `nanokvm` client interface: `login()` (**AES-encrypt password per §1** → POST → capture
+  `nano-kvm-token` JWT from response/cookie, cache, re-auth on 401/expiry) · `getGpio()` (power state) ·
+  `setGpio(type,duration)` (ATX) · `snapshot()` (first MJPEG frame) · `getInfo()` (status/identity).
+  Depends on the `crypto-js` package for the login encryption.
 - Reverse-proxy hosts have valid TLS; direct-IP hosts would need cert handling — config carries the base URL.
 - **Config/env naming:** standardize on `NANOKVM_USER` / `NANOKVM_PASSWORD`. Current `.env` uses
   `NANOKMV_USER` (typo) and `NANOKVM_PWD` — reconcile in the config loader or fix `.env`.
 
-## Open item (blocker)
+## Resolved
 
-- The password currently in `.env` is **rejected** by the unit (`-2 invalid username or password`),
-  verified via curl and an in-page fetch. Username `kvmadmin` is correct (present in the live JWT).
-  Need the correct password before the `nanokvm` client can authenticate from scratch.
+- The `.env` credentials (`kvmadmin` / the 19-char password) are **correct**. The earlier `-2` failures
+  were entirely due to missing the client-side AES encryption described in §1 — once replicated, both
+  units return `code:0`. No credential change needed; just standardize the env var names
+  (`NANOKMV_USER` → `NANOKVM_USER`, `NANOKVM_PWD` → `NANOKVM_PASSWORD`).
