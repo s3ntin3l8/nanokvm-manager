@@ -1,0 +1,27 @@
+# Secrets / local config — NEVER commit
+.env
+.env.*
+!.env.example
+*.local
+config/hosts.json
+config/hosts.yaml
+
+# Node
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+coverage/
+
+# Logs / OS
+*.log
+npm-debug.log*
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+
+# Claude local settings (keep .claude/plans tracked)
+.claude/settings.local.json
