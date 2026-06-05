@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+# Host inventory is mounted at runtime (compose volume), never baked in
+config/hosts.json
+config/hosts.yaml
+
 .git
 .github
 .husky

@@ -55,7 +55,29 @@ Frontend: `HostGrid` → per-host `HostCard` (isolated state so one host's refre
 
 ## Dev / build / test commands
 
-_TBD once scaffolded (pnpm workspace: `server/`, `web/`)._ Update this section as the toolchain lands.
+```bash
+corepack enable                      # provides pnpm (version pinned in package.json)
+pnpm install                         # deps + wires git hooks
+
+pnpm -r typecheck                    # tsc --noEmit (server + web)
+pnpm -r test                         # vitest (server)
+pnpm -r build                        # server (tsup -> server/dist) + web (vite -> web/dist)
+pnpm lint && pnpm format             # eslint / prettier --write
+
+# Run locally (needs config/hosts.json + .env with NANOKVM_USER / NANOKVM_PASSWORD)
+pnpm --filter nanokvm-server dev     # Fastify on :8080 (tsx watch)
+pnpm --filter nanokvm-web dev        # Vite dev server, proxies /api -> :8080
+
+# Production-style (one process serves web/dist + API):
+pnpm -r build && node server/dist/index.js
+
+# Docker
+docker compose up --build                 # local source build (uses compose.override.yaml)
+docker compose -f compose.yaml up -d      # production: pull published GHCR image
+```
+
+Config: `config/hosts.json` (gitignored; copy `config/hosts.example.json`). Secrets: `.env`
+(copy `.env.example`). The server runs without HA/Loki configured — those features simply stay off.
 
 ## Plan
 
