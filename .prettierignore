@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+coverage
+pnpm-lock.yaml
+.env
+.env.*
+*.md
+docs/
+CLAUDE.md
+.claude/
+.husky/
