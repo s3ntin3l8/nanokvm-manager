@@ -4,13 +4,19 @@
 #
 # Replace nanokvm.example.com / proxy / letsencrypt / websecure with your values.
 services:
-  app:
+  nanokvm-dash:
     # Build from source instead of pulling the published GHCR image.
     build:
       context: .
       dockerfile: Dockerfile
     image: nanokvm-manager:local
     pull_policy: build
+    # Compose MERGES list fields (ports, etc.) across files — it does NOT replace
+    # them. To change the host port from compose.yaml's default you must use the
+    # !override tag, or you'll bind BOTH ports. Behind Traefik you usually don't
+    # need to publish a host port at all (use `ports: !reset []`).
+    # ports: !override
+    #   - '8050:8080'
     networks:
       - default
       - proxy

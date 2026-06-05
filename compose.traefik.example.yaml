@@ -32,7 +32,7 @@ services:
       - proxy
     restart: unless-stopped
 
-  app:
+  nanokvm-dash:
     image: ghcr.io/s3ntin3l8/nanokvm-manager:latest
     env_file:
       - .env
