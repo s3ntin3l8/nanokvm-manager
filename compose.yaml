@@ -1,0 +1,18 @@
+name: nanokvm-manager
+
+# Production: pulls the published image from GHCR.
+# Local development overrides this with a source build via compose.override.yaml
+# (auto-merged by `docker compose up`). For production, ignore the override:
+#   docker compose -f compose.yaml up -d
+services:
+  app:
+    image: ghcr.io/s3ntin3l8/nanokvm-manager:latest
+    container_name: nanokvm-manager
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    env_file:
+      - .env
+    volumes:
+      # Host inventory config (static; format defined during scaffolding).
+      - ./config:/app/config:ro

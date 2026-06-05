@@ -1,0 +1,21 @@
+# Keep secrets and cruft out of the build context / image
+.env
+.env.*
+!.env.example
+
+.git
+.github
+.husky
+.claude
+
+node_modules
+**/node_modules
+dist
+build
+coverage
+
+docs
+*.md
+.vscode
+.idea
+*.log

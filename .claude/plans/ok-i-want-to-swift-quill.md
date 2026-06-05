@@ -132,7 +132,15 @@ states what and why.
 6. **`loki` module** — history + tail; log drawer in card.
 7. **mDNS discovery** (optional, last) — `bonjour-service`/`multicast-dns`; merge into inventory;
    "discovered, unconfigured" state.
-8. **Dockerize** — multi-stage build, single image serving API + built static frontend.
+8. **Dockerize** — multi-stage `Dockerfile` (deps → build → pruned runtime via `pnpm deploy --prod`),
+   single image serving the API + built static frontend on port 8080. `.dockerignore` (excludes
+   `.env`, `.git`, docs, node_modules). `compose.yaml` pulls the published GHCR image; `compose.override.yaml`
+   adds `build:` so a local `docker compose up` builds from source (prod uses `docker compose -f compose.yaml up -d`).
+   Release-gated publish: `.github/workflows/release.yml` builds + pushes to `ghcr.io/s3ntin3l8/nanokvm-manager`
+   on `release: published` (and `workflow_dispatch`), tagged by semver + `latest`, using the built-in
+   `GITHUB_TOKEN` (no registry secrets). The push/PR `ci.yml` stays lint/typecheck/test/build only — it does
+   **not** build Docker. (Note: the Dockerfile/compose are committed as the deployment target now; they only
+   build successfully once the `server`/`web` workspaces exist — verified at scaffolding.)
 
 ## Deployment notes / caveats
 
@@ -146,6 +154,15 @@ states what and why.
 - **Secrets:** NanoKVM per-host credentials, HA long-lived token, and Loki URL come from config/env,
   never the frontend. Backend holds all tokens; browser only talks to our API.
 - **Network path:** backend must reach the KVM VLAN, the Home Assistant instance, and Loki.
+- **Deployment (Docker):** single multi-stage image. `compose.yaml` = production (pulls
+  `ghcr.io/s3ntin3l8/nanokvm-manager:latest`, `env_file: .env`, mounts `./config` read-only for the host
+  inventory). `compose.override.yaml` = local builds from source (auto-merged by `docker compose up`).
+  Images published to **GHCR** only on GitHub **release** (semver + `latest` tags), built for `linux/amd64`
+  (arm64 can be added later via buildx if a Pi-based host appears). Auth uses the built-in `GITHUB_TOKEN`.
+- **Open-source readiness (repo will be public):** NO secrets anywhere in the repo. `.env` is gitignored;
+  a sanitized **`.env.example`** is committed as the template. `.dockerignore` keeps `.env` out of the build
+  context/image. Internal hostnames/IPs currently in `docs/` are acceptable while the repo is private —
+  revisit/scrub before flipping the repo public.
 
 ## Verification (end-to-end)
 
