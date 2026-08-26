@@ -53,3 +53,7 @@ docker compose -f compose.traefik.example.yaml up -d   # full Traefik stack exam
 ```
 
 Images are published to GHCR automatically on GitHub **release** (`.github/workflows/release.yml`).
+
+## License
+
+AGPL-3.0
