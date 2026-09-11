@@ -28,3 +28,10 @@ npm-debug.log*
 
 # Claude local settings (keep .claude/plans tracked)
 .claude/settings.local.json
+
+# Developer worktrees (per AGENTS.md make wt convention)
+.wt/
+
+# Agent workspace / superpowers plans scratch
+docs/superpowers/
+
